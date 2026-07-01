@@ -1,0 +1,112 @@
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix ex: <http://example.org/>.
+
+### Import runners
+<> owl:imports <./node_modules/@rdfc/js-runner/index.ttl>.
+<> owl:imports <https://javadoc.jitpack.io/com/github/rdf-connect/jvm-runner/runner/master-SNAPSHOT/runner-master-SNAPSHOT-index.jar>.
+<> owl:imports <./.venv/lib/python3.13/site-packages/rdfc_runner/index.ttl>.
+
+### Import processors
+<> owl:imports <./build/plugins/rml-processor-jvm-master-SNAPSHOT-all.jar>.
+<> owl:imports <./node_modules/@rdfc/http-utils-processor-ts/processors.ttl>.
+<> owl:imports <./node_modules/@rdfc/log-processor-ts/processor.ttl>.
+<> owl:imports <./node_modules/@rdfc/sensorthings-api-fetcher-ts/processor.ttl>.
+<> owl:imports <./node_modules/@rdfc/file-utils-processors-ts/processors.ttl>.
+<> owl:imports <./node_modules/@rdfc/shacl-processor-ts/processors.ttl>.
+<> owl:imports <./node_modules/@rdfc/sparql-ingest-processor-ts/processors.ttl>.
+<> owl:imports <./.venv/lib/python3.13/site-packages/rdfc_translation_processor/processor.ttl>.
+
+### Define the channels
+<json> a rdfc:Reader, rdfc:Writer.
+<mappingData> a rdfc:Reader, rdfc:Writer.
+<rdf> a rdfc:Reader, rdfc:Writer.
+<translated> a rdfc:Reader, rdfc:Writer.
+<validated> a rdfc:Reader, rdfc:Writer.
+<report> a rdfc:Reader, rdfc:Writer.
+<sparql> a rdfc:Reader, rdfc:Writer.
+
+### Define the pipeline
+<> a rdfc:Pipeline;
+   rdfc:consistsOf [
+       rdfc:instantiates rdfc:NodeRunner;
+       rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>, <reporter>, <ingester>;
+   ], [
+       rdfc:instantiates rdfc:JvmRunner;
+       rdfc:processor <mapper>;
+   ], [
+       rdfc:instantiates rdfc:PyRunner;
+       rdfc:processor <translator>;
+   ].
+   
+# fetcher to get SensorThings API data
+<fetcher> a rdfc:SensorThingsFetcher;
+    rdfc:datastream "https://iot.hamburg.de/v1.1/Datastreams(26598)", "https://iot.hamburg.de/v1.1/Datastreams(29728)", "https://iot.hamburg.de/v1.1/Datastreams(30936)";
+    rdfc:writer <json> ;
+    rdfc:mqttBrokerUrl [ a rdfl:EnvVariable;
+		rdfl:envDefault "mqtt://iot.hamburg.de:1883";
+		rdfl:envKey "MQTTBROKER";
+	]; 
+    rdfc:follow false .
+
+
+# Processor to read and stream out the RML mappings
+<mappingReader> a rdfc:GlobRead;
+    rdfc:glob <./resources/mapping.rml.ttl>;
+    rdfc:output <mappingData>.
+
+# Processor to do the RML mapping
+<mapper> a rdfc:RmlMapper;
+    rdfc:mappings <mappingData>;
+    rdfc:source [
+        rdfc:triggers true;
+        rdfc:reader <json>;
+        rdfc:mappingId ex:source1;
+    ];
+    rdfc:defaultTarget [
+        rdfc:writer <rdf>;
+        rdfc:format "turtle";
+    ].
+
+# Processor to translate RDF literals from German to English
+<translator> a rdfc:TranslationProcessor;
+    rdfc:reader <rdf>;
+    rdfc:writer <translated>;
+    rdfc:model "Helsinki-NLP/opus-mt-de-nl";
+    rdfc:sourceLanguage "de";
+    rdfc:targetLanguage "nl".
+
+
+# Processor to validate the output RDF with SHACL
+<validator> a rdfc:Validate;
+    rdfc:shaclPath "./resources/oslo-verkeermetingen-shape.ttl";
+    rdfc:incoming <translated>;
+    rdfc:outgoing <validated>;
+    rdfc:report <report>;
+    rdfc:validationIsFatal false;
+    rdfc:mime "text/turtle".
+
+# Processor to log the SHACL report
+<reporter> a rdfc:LogProcessorJs;
+      rdfc:reader <report>;
+      rdfc:level "warn";
+      rdfc:label "report".
+
+# Processor to ingest RDF data into a SPARQL endpoint
+<ingester> a rdfc:SPARQLIngest;
+    rdfc:memberStream <validated>;
+    rdfc:ingestConfig [
+        rdfc:memberIsGraph false;
+        rdfc:targetNamedGraph "http://ex.org/HamburgOpenData";
+        rdfc:graphStoreUrl "http://oxigraph:7878/update"; # (for local oxigraph graphstore)
+        # rdfc:graphStoreUrl "http://127.0.0.1:7878/update"; 
+        rdfc:forVirtuoso false
+    ];
+    rdfc:sparqlWriter <sparql>.
+
+# Processor to log the output
+<logger> a rdfc:LogProcessorJs;
+    rdfc:reader <sparql>;
+    rdfc:level "info";
+    rdfc:label "output".

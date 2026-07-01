@@ -1,0 +1,18 @@
+
+services:    
+  devbox:
+    container_name: devbox
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["/bin/bash", "-c", "tail -f /dev/null"]
+    tty: true
+    stdin_open: true
+    volumes:
+      - "../../:/workspace"
+    networks:
+      - rdfc-net
+      
+networks:
+  rdfc-net:
+    external: true

@@ -1,0 +1,8 @@
+node_modules/
+build/
+.gradle/
+jvm-runner.jar
+.venv/
+dist/
+virtuoso-data/
+oxigraph-data/

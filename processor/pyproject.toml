@@ -1,0 +1,44 @@
+[project]
+name = "rdfc_translation-processor"
+version = "0.0.1"
+description = "A processor to translate text using a specified ML translation model."
+authors = [
+    { name = "Ieben Smessaert", email = "ieben.smessaert@ugent.be" }
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+license = "MIT"
+dependencies = [
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "rdfc-proto>=1.0.0",
+    "rdfc-runner>=1.0.0",
+    "rdflib>=7.3.0",
+    "sacremoses>=0.1.1",
+    "sentencepiece>=0.2.1",
+    "torch>=2.9.0",
+    "transformers>=4.57.1",
+]
+
+[project.urls]
+Homepage = "https://rdf-connect.github.io"
+Repository = "https://github.com/rdf-connect/template-processor-py"
+Issues = "https://github.com/rdf-connect/template-processor-py/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rdfc_translation_processor"]
+
+[tool.hatch.envs.default]
+type = "virtual"
+path = ".venv"
+system-packages = false
+installer = "uv"
+env-vars = { PYTHONPATH = "src" }
+
