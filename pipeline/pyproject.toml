@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = "==3.13.*"
 license = "MIT"
 dependencies = [
-    "rdfc-runner>=1.0.0",
+    "rdfc-runner",
     "rdfc-translation-processor",
     "rdflib>=7.6.0",
     "sacremoses>=0.1.1",
@@ -38,5 +38,6 @@ installer = "uv"
 env-vars = { PYTHONPATH = "src" }
 
 [tool.uv.sources]
-rdfc-translation-processor = { path = "../processor/dist/rdfc_translation_processor-0.0.1.tar.gz" }
+rdfc-translation-processor = { path = "../processor/translation-processor-py/dist/rdfc_translation_processor-0.0.1.tar.gz" }
+rdfc-runner = { path = "../processor/py-runner/dist/rdfc_runner-1.0.0.tar.gz" }
 

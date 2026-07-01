@@ -10,13 +10,13 @@
 
 ### Import processors
 <> owl:imports <./build/plugins/rml-processor-jvm-master-SNAPSHOT-all.jar>.
-<> owl:imports <./node_modules/@rdfc/http-utils-processor-ts/processors.ttl>.
 <> owl:imports <./node_modules/@rdfc/log-processor-ts/processor.ttl>.
 <> owl:imports <./node_modules/@rdfc/sensorthings-api-fetcher-ts/processor.ttl>.
 <> owl:imports <./node_modules/@rdfc/file-utils-processors-ts/processors.ttl>.
 <> owl:imports <./node_modules/@rdfc/shacl-processor-ts/processors.ttl>.
 <> owl:imports <./node_modules/@rdfc/sparql-ingest-processor-ts/processors.ttl>.
 <> owl:imports <./.venv/lib/python3.13/site-packages/rdfc_translation_processor/processor.ttl>.
+<> owl:imports <../processor/http-utils-processor-ts/processors.ttl>.
 
 ### Define the channels
 <json> a rdfc:Reader, rdfc:Writer.
@@ -31,7 +31,7 @@
 <> a rdfc:Pipeline;
    rdfc:consistsOf [
        rdfc:instantiates rdfc:NodeRunner;
-       rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>, <reporter>, <ingester>;
+       rdfc:processor <fetcher>, <logger>, <mappingReader>, <validator>, <reporter>, <poster>;
    ], [
        rdfc:instantiates rdfc:JvmRunner;
        rdfc:processor <mapper>;
@@ -48,7 +48,7 @@
 		rdfl:envDefault "mqtt://iot.hamburg.de:1883";
 		rdfl:envKey "MQTTBROKER";
 	]; 
-    rdfc:follow false .
+    rdfc:follow true .
 
 
 # Processor to read and stream out the RML mappings
@@ -93,17 +93,22 @@
       rdfc:level "warn";
       rdfc:label "report".
 
-# Processor to ingest RDF data into a SPARQL endpoint
-<ingester> a rdfc:SPARQLIngest;
-    rdfc:memberStream <validated>;
-    rdfc:ingestConfig [
-        rdfc:memberIsGraph false;
-        rdfc:targetNamedGraph "http://ex.org/HamburgOpenData";
-        rdfc:graphStoreUrl "http://oxigraph:7878/update"; # (for local oxigraph graphstore)
-        # rdfc:graphStoreUrl "http://127.0.0.1:7878/update"; 
-        rdfc:forVirtuoso false
-    ];
-    rdfc:sparqlWriter <sparql>.
+<poster> a rdfc:HttpFetch;
+    rdfc:url [ a rdfl:EnvVariable;
+		rdfl:envDefault "http://oxigraph:7878/store?graph=http%3A%2F%2Fex.org%2FHamburgOpenData";
+		rdfl:envKey "GRAPHSTORE";
+	]; 
+    rdfc:reader <validated>;
+    rdfc:options [
+        rdfc:method "POST";
+        rdfc:headers "Content-Type: text/turtle";
+        rdfc:acceptStatusCodes "200-300";
+        rdfc:bodyCanBeEmpty true;
+        rdfc:timeOutMilliseconds 5000;
+        rdfc:errorsAreFatal false 
+    ].
+
+
 
 # Processor to log the output
 <logger> a rdfc:LogProcessorJs;

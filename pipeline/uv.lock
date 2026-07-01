@@ -621,7 +621,7 @@ wheels = [
 [[package]]
 name = "rdfc-translation-processor"
 version = "0.0.1"
-source = { path = "../processor/dist/rdfc_translation_processor-0.0.1.tar.gz" }
+source = { path = "../processor/translation-processor-py/dist/rdfc_translation_processor-0.0.1.tar.gz" }
 dependencies = [
     { name = "pytest" },
     { name = "pytest-asyncio" },

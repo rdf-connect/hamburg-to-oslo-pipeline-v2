@@ -79,13 +79,21 @@ The [sensorthings](https://github.com/rdf-connect/sensorthings-api-fetcher-ts) c
 The [RML](https://github.com/rdf-connect/rml-processor-jvm) component performs the provided RML mapping over the input data retrieved from the sensorthings component.
 
 ### Translator
-The [translator](./processor/) component adds translations of all German literals in Dutch.
+The [translator](./processor/translation-processor-py) component adds translations of all German literals in Dutch.
 
 ### Validator
 The [validator](https://github.com/rdf-connect/shacl-processor-ts) component validates the output data according to the given shape. In this case, this is the [SHACL template for OSLO verkeersmetingen](https://data.vlaanderen.be/doc/applicatieprofiel/verkeersmetingen/erkendestandaard/2024-04-17/shacl/Verkeersmetingen-ap-SHACL.ttl).
 
 ### Ingest
 The [ingest](https://github.com/rdf-connect/sparql-ingest-processor-ts) component ingests the resulting data into a graphstore via the SPARQL INSERT protocol.
+
+## Setting target datastreams
+The target datastreams are set directly in the [rdfc pipeline file](./pipeline/pipeline.ttl), which takes a set of datastream URLs.
+```
+# fetcher to get SensorThings API data
+<fetcher> a rdfc:SensorThingsFetcher;
+    rdfc:datastream <target>, <pipelines>, ...
+```
 
 ## Mappings
 The mapping file can be found [as an RML document](./pipeline/resources/mapping.rml.ttl), generated from the [YARRRML mapping](./pipeline/resources/yarrrml/mapping.yml).
