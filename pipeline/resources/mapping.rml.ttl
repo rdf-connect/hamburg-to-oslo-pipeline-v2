@@ -30,9 +30,9 @@
 @prefix iso19103-mp: <http://def.isotc211.org/iso19103/2015/MeasureTypes#>.
 @prefix schema: <https://schema.org/>.
 @prefix cdt: <https://w3id.org/cdt/>.
-@prefix cl-vrt: <https://data.vlaanderen.be/doc/concept/VkmVoertuigType/>.
-@prefix cl-vkt: <https://data.vlaanderen.be/doc/concept/VkmVerkeersKenmerkType/>.
-@prefix cl-mit: <https://data.vlaanderen.be/doc/concept/VkmMeetInstrumentType/>.
+@prefix cl-vrt: <https://data.vlaanderen.be/id/concept/VkmVoertuigType/>.
+@prefix cl-vkt: <https://data.vlaanderen.be/id/concept/VkmVerkeersKenmerkType/>.
+@prefix cl-mit: <https://data.vlaanderen.be/id/concept/VkmMeetInstrumentType/>.
 @prefix cl-trt: <https://inspire.ec.europa.eu/codelist/LinkDirectionValue/>.
 @prefix ex: <https://example.org/id/>.
 @prefix rdfc: <https://w3id.org/rdf-connect#>.
@@ -452,7 +452,7 @@
 :pm_034 rr:constant dct:type.
 :pom_034 rr:objectMap :om_034.
 :om_034 a rr:ObjectMap;
-    rr:constant cl-mit:telraam;
+    rr:constant cl-mit:standaard_Camera;
     rr:termType rr:IRI.
 :pom_035 a rr:PredicateObjectMap.
 :map_sensor_000 rr:predicateObjectMap :pom_035.
@@ -789,7 +789,7 @@
     rdfs:label "concept_voertuigtype".
 :s_018 a rr:SubjectMap.
 :map_concept_voertuigtype_000 rr:subjectMap :s_018.
-:s_018 rr:constant "https://data.vlaanderen.be/doc/concept/VkmVoertuigType/auto".
+:s_018 rr:constant "https://data.vlaanderen.be/id/concept/VkmVoertuigType/auto".
 :pom_066 a rr:PredicateObjectMap.
 :map_concept_voertuigtype_000 rr:predicateObjectMap :pom_066.
 :pm_066 a rr:PredicateMap.
@@ -805,7 +805,7 @@
     rdfs:label "concept_kenmerktype".
 :s_019 a rr:SubjectMap.
 :map_concept_kenmerktype_000 rr:subjectMap :s_019.
-:s_019 rr:constant "https://data.vlaanderen.be/doc/concept/VkmVerkeersKenmerkType/aantal".
+:s_019 rr:constant "https://data.vlaanderen.be/id/concept/VkmVerkeersKenmerkType/aantal".
 :pom_067 a rr:PredicateObjectMap.
 :map_concept_kenmerktype_000 rr:predicateObjectMap :pom_067.
 :pm_067 a rr:PredicateMap.

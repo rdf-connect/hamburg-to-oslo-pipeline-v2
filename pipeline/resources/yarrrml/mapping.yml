@@ -37,9 +37,9 @@ prefixes:
   schema: "https://schema.org/"
   cdt: "https://w3id.org/cdt/"
 
-  cl-vrt: "https://data.vlaanderen.be/doc/concept/VkmVoertuigType/"
-  cl-vkt: "https://data.vlaanderen.be/doc/concept/VkmVerkeersKenmerkType/"
-  cl-mit: "https://data.vlaanderen.be/doc/concept/VkmMeetInstrumentType/"
+  cl-vrt: "https://data.vlaanderen.be/id/concept/VkmVoertuigType/"
+  cl-vkt: "https://data.vlaanderen.be/id/concept/VkmVerkeersKenmerkType/"
+  cl-mit: "https://data.vlaanderen.be/id/concept/VkmMeetInstrumentType/"
   cl-trt: "https://inspire.ec.europa.eu/codelist/LinkDirectionValue/"
 
   ex: "https://example.org/id/"
@@ -275,8 +275,10 @@ mappings:
       - p: a
         o: sosa:Sensor
 
+      # Hamburg's sensor is a FLIR ThermiCam2 thermal-imaging traffic camera,
+      # mapped to the closest VkmMeetInstrumentType concept.
       - p: dct:type
-        o: "cl-mit:telraam~iri"
+        o: "cl-mit:standaard_Camera~iri"
 
       - p: dct:identifier
         o: "$(sensor['@iot.id'])"
