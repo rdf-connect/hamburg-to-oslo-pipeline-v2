@@ -1,0 +1,56 @@
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+rdfc:RoadSnapperProcessor rdfc:pyImplementationOf rdfc:Processor;
+    rdfs:label "Road Snapper Processor";
+    rdfs:comment "Pre-RML enricher: snaps each SensorThings record's coordinate to the nearest road segment and injects a _wegsegment (centerline + begin/end) into the JSON.";
+    rdfc:modulePath "rdfc_road_snapper.processor";
+    rdfc:class "RoadSnapperProcessor".
+
+[ ] a sh:NodeShape;
+    sh:targetClass rdfc:RoadSnapperProcessor;
+    sh:property [
+        sh:class rdfc:Reader;
+        sh:path rdfc:reader;
+        sh:name "reader";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:class rdfc:Writer;
+        sh:path rdfc:writer;
+        sh:name "writer";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:string;
+        sh:path rdfc:sourcePath;
+        sh:name "source_path";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:string;
+        sh:path rdfc:projectedCrs;
+        sh:name "projected_crs";
+        sh:minCount 0;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:double;
+        sh:path rdfc:maxDistanceMeters;
+        sh:name "max_distance_meters";
+        sh:minCount 0;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:string;
+        sh:path rdfc:layer;
+        sh:name "layer";
+        sh:minCount 0;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:string;
+        sh:path rdfc:where;
+        sh:name "where";
+        sh:minCount 0;
+        sh:maxCount 1;
+    ].

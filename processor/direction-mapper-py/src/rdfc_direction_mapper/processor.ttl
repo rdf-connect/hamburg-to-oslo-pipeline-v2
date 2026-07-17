@@ -1,0 +1,32 @@
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+rdfc:DirectionMapperProcessor rdfc:pyImplementationOf rdfc:Processor;
+    rdfs:label "Direction Mapper Processor";
+    rdfs:comment "Pre-RML enricher: classifies each record's German direction phrase (thing.properties.richtung) as inDirection / inOppositeDirection / bothDirections relative to the injected _wegsegment bearing, injecting _rijrichting into the JSON.";
+    rdfc:modulePath "rdfc_direction_mapper.processor";
+    rdfc:class "DirectionMapperProcessor".
+
+[ ] a sh:NodeShape;
+    sh:targetClass rdfc:DirectionMapperProcessor;
+    sh:property [
+        sh:class rdfc:Reader;
+        sh:path rdfc:reader;
+        sh:name "reader";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:class rdfc:Writer;
+        sh:path rdfc:writer;
+        sh:name "writer";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:double;
+        sh:path rdfc:threshold;
+        sh:name "threshold";
+        sh:minCount 0;
+        sh:maxCount 1;
+    ].
