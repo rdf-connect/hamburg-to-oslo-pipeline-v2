@@ -11,6 +11,8 @@ license = "MIT"
 dependencies = [
     "rdfc-runner",
     "rdfc-translation-processor",
+    "rdfc-road-snapper",
+    "rdfc-direction-mapper",
     "rdflib>=7.6.0",
     "sacremoses>=0.1.1",
     "sentencepiece>=0.2.1",
@@ -39,5 +41,7 @@ env-vars = { PYTHONPATH = "src" }
 
 [tool.uv.sources]
 rdfc-translation-processor = { path = "../processor/translation-processor-py/dist/rdfc_translation_processor-0.0.1.tar.gz" }
+rdfc-road-snapper = { path = "../processor/road-snapper-py/dist/rdfc_road_snapper-0.0.1.tar.gz" }
+rdfc-direction-mapper = { path = "../processor/direction-mapper-py/dist/rdfc_direction_mapper-0.0.1.tar.gz" }
 rdfc-runner = { path = "../processor/py-runner/dist/rdfc_runner-1.0.0.tar.gz" }
 
