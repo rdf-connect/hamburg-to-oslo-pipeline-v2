@@ -2,11 +2,11 @@ prefixes:
   rr: "http://www.w3.org/ns/r2rml#"
   rml: "http://semweb.mmlab.be/ns/rml#"
   ql: "http://semweb.mmlab.be/ns/ql#"
-  dc: "http://purl.org/dc/elements/1.1/"
   xsd: "http://www.w3.org/2001/XMLSchema#"
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
   rdfs: "http://www.w3.org/2000/01/rdf-schema#"
   dct: "http://purl.org/dc/terms/"
+  dc11: "http://purl.org/dc/elements/1.1/"
   prov: "http://www.w3.org/ns/prov#"
 
   sosa: "http://www.w3.org/ns/sosa/"
@@ -15,16 +15,31 @@ prefixes:
   geo: "http://www.opengis.net/ont/geosparql#"
   sf: "http://www.opengis.net/ont/sf#"
 
+  # OSLO Verkeersmetingen reference vocabulary (Telraam LDES).
+  verkeer: "https://data.vlaanderen.be/ns/verkeersmetingen#"
+  impl: "https://implementatie.data.vlaanderen.be/ns/vsds-verkeersmetingen#"
+  dv-weg: "https://data.vlaanderen.be/ns/weg#"
+  dv-netwerk: "https://data.vlaanderen.be/ns/netwerk#"
+
+  iso19156-ob: "http://def.isotc211.org/iso19156/2011/Observation#"
+  iso19156-sp: "http://def.isotc211.org/iso19156/2011/SamplingPoint#"
+
+  # Temporal classes required by the (defect-corrected) SHACL.
+  iso19108: "http://def.isotc211.org/iso19108/2006/TemporalObjects#"
+
+  # Simple-features LineString class the SHACL WegsegmentShape requires.
+  sf-sg: "http://schemas.opengis.net/sf/1.0/simple_features_geometries.rdf#"
+
   skos: "http://www.w3.org/2004/02/skos/core#"
 
-  om: "http://def.isotc211.org/iso19156/2011/Observation#"
+  # Puntreferentie.opPositie (Length) — matches the Telraam reference.
+  iso19103-mp: "http://def.isotc211.org/iso19103/2015/MeasureTypes#"
+  schema: "https://schema.org/"
+  cdt: "https://w3id.org/cdt/"
 
-  verkeer: "https://data.vlaanderen.be/ns/mobiliteit#"
-  verkeersmetingen: "https://data.vlaanderen.be/ns/verkeersmetingen#"
-
-  cl-vrt: "https://data.vlaanderen.be/doc/concept/VkmVoertuigType/"
-  cl-vkt: "https://data.vlaanderen.be/doc/concept/VkmVerkeersKenmerkType/"
-  cl-mit: "https://data.vlaanderen.be/doc/concept/VkmMeetInstrumentType/"
+  cl-vrt: "https://data.vlaanderen.be/id/concept/VkmVoertuigType/"
+  cl-vkt: "https://data.vlaanderen.be/id/concept/VkmVerkeersKenmerkType/"
+  cl-mit: "https://data.vlaanderen.be/id/concept/VkmMeetInstrumentType/"
   cl-trt: "https://inspire.ec.europa.eu/codelist/LinkDirectionValue/"
 
   ex: "https://example.org/id/"
@@ -38,127 +53,12 @@ sources:
 mappings:
 
   #################################################
-  # Dataset
-  #################################################
-  dataset:
-    sources:
-      - source
-
-    s: "ex:dataset/hamburg-verkeersmetingen"
-
-    po:
-      - p: a
-        o: dct:Dataset
-
-      - p: dct:title
-        o: "Hamburg SensorThings verkeersmetingen"
-        language: nl
-
-      - p: dct:description
-        o: "Verkeersmetingen gemapt vanuit Hamburg SensorThings API naar OSLO Verkeersmetingen."
-        language: nl
-
-      - p: dct:source
-        o: "$(datastream['@iot.selfLink'])~iri"
-
-      - p: dct:identifier
-        o: "$(datastream.properties.serviceName)"
-
-
-  #################################################
-  # Verkeerstelling / Verkeersmeting
-  #################################################
-  verkeerstelling:
-    sources:
-      - source
-
-    s: "ex:verkeerstelling/$(observation['@iot.id'])"
-
-    po:
-      - p: a
-        o: verkeersmetingen:Verkeerstelling
-
-      # If your validator also targets the generic superclass explicitly,
-      # keeping this type is useful and normally harmless.
-      - p: a
-        o: verkeer:Verkeersmeting
-
-      - p: dct:identifier
-        o: "$(observation['@iot.id'])"
-
-      - p: dct:source
-        o: "$(observation['@iot.selfLink'])~iri"
-
-      - p: dct:memberOf
-        o: "ex:dataset/hamburg-verkeersmetingen~iri"
-
-      - p: prov:generatedAtTime
-        o: "$(observation.resultTime)"
-        datatype: xsd:dateTime
-
-      # OSLO: Verkeersmeting.geobserveerdKenmerk
-      - p: verkeer:geobserveerdKenmerk
-        o: "ex:verkeerstellingkenmerk/$(observation['@iot.id'])~iri"
-
-      # OSLO: Verkeersmeting.geobserveerdObject
-      - p: verkeer:geobserveerdObject
-        o: "ex:verkeersmeetpunt/$(thing['@iot.id'])~iri"
-
-      # OSLO: Verkeersmeting.fenomeenTijd
-      - p: verkeer:fenomeenTijd
-        o: "ex:tijdsinterval/$(observation['@iot.id'])~iri"
-
-      # OSLO: Verkeersmeting.uitgevoerdMet
-      - p: verkeer:uitgevoerdMet
-        o: "ex:sensor/$(sensor['@iot.id'])~iri"
-
-      # Keep SOSA compatibility as additional non-conflicting information.
-      - p: sosa:madeBySensor
-        o: "ex:sensor/$(sensor['@iot.id'])~iri"
-
-      - p: sosa:phenomenonTime
-        o: "ex:tijdsinterval/$(observation['@iot.id'])~iri"
-
-      # Generic OM result. The OSLO examples map Verkeersmeting.resultaat
-      # to om:OM_Observation.result.
-      - p: om:OM_Observation.result
-        o: "$(observation.result)"
-        datatype: xsd:integer
-
-      # Verkeerstelling-specific result property used in the AP examples.
-      - p: verkeersmetingen:verkeerstellingTellingresultaat
-        o: "$(observation.result)"
-        datatype: xsd:integer
-
-
-#################################################
-  # Verkeerstellingkenmerk
-  #################################################
-  verkeerstellingkenmerk:
-    sources:
-      - source
-
-    s: "ex:verkeerstellingkenmerk/$(observation['@iot.id'])"
-
-    po:
-      - p: a
-        o: verkeersmetingen:Verkeerstellingkenmerk
-
-      - p: a
-        o: verkeersmetingen:Verkeerskenmerk
-
-      # Required by SHACL as dc11:type.
-      # dc11 = http://purl.org/dc/elements/1.1/
-      - p: dc:type
-        o: "cl-vkt:aantal~iri"
-
-      # Vehicle type must point to a resource that is typed as skos:Concept.
-      # Todo: check if cl-vrt is the wanted target type of vehicle. These are mapped from the german term of motorverhicle, which could entail any kind of vehicle that is not a heavy transport, which are measured separately. I am currently unsure if those heavy vehicles are also included in the regular counts, but my instinct says they are not.
-      - p: verkeersmetingen:voertuigType
-        o: "cl-vrt:auto~iri"
-
-  #################################################
-  # Verkeersmeetpunt
+  # Verkeersmeetpunt (location)
+  #
+  # bemonsterdObject -> Rijrichting (which nests the Wegsegment). Point geometry
+  # via the ISO 19156 sampling-point shape. Segment + direction are pre-injected
+  # into the JSON by the road-snapper (_wegsegment) and direction-mapper
+  # (_rijrichting) before this mapping runs.
   #################################################
   verkeersmeetpunt:
     sources:
@@ -168,17 +68,16 @@ mappings:
 
     po:
       - p: a
-        o: verkeersmetingen:Verkeersmeetpunt
+        o: verkeer:Verkeersmeetpunt
+      # geobserveerdObject on the measurement requires class vkm:Verkeersobject.
+      - p: a
+        o: verkeer:Verkeersobject
 
       - p: dct:identifier
         o: "$(thing.properties.assetID)"
 
       - p: rdfs:label
         o: "$(thing.name)"
-        language: de
-
-      - p: dct:description
-        o: "$(thing.description)"
         language: de
 
       - p: dct:source
@@ -188,45 +87,52 @@ mappings:
         o: "$(thing.properties.infoLastUpdate)"
         datatype: xsd:dateTime
 
-      # OSLO examples use Verkeersmeetpunt.geometrie.
-      - p: verkeersmetingen:geometrie
+      - p: iso19156-sp:SF_SamplingPoint.shape
         o: "ex:geometrie/$(thing['@iot.id'])~iri"
 
-      # Additional GeoSPARQL compatibility.
-      - p: geo:hasGeometry
-        o: "ex:geometrie/$(thing['@iot.id'])~iri"
+      - p: verkeer:bemonsterdObject
+        o: "ex:rijrichting/$(datastream['@iot.id'])~iri"
 
-      # Direction is intentionally not fully solved.
-      # The linked node only stores the Hamburg free-text description.
-      - p: verkeersmetingen:rijrichting
-        o: "ex:rijrichting/$(datastream.properties.direction)~iri"
+      # Puntreferentie locating the meetpunt on the snapped network (offset
+      # along the segment = _wegsegment.offsetM).
+      - p: impl:Verkeersmeetpunt.verkeersmeetpuntnetwerkreferentie
+        o: "ex:puntreferentie/$(datastream['@iot.id'])~iri"
 
 
   #################################################
-  # Rijrichting placeholder
+  # Puntreferentie: position of the meetpunt along the snapped Wegsegment
   #################################################
-  rijrichting:
+  puntreferentie:
     sources:
       - source
 
-    s: "ex:rijrichting/$(datastream['@iot.id'])"
+    s: "ex:puntreferentie/$(datastream['@iot.id'])"
 
     po:
       - p: a
-        o: verkeersmetingen:Rijrichting
+        o: dv-netwerk:Puntreferentie
+      - p: dv-netwerk:Puntreferentie.opPositie
+        o: "ex:puntreferentie/$(datastream['@iot.id'])/positie~iri"
 
-      - p: rdfs:label
-        o: "$(thing.properties.richtung)"
-        language: de
+  puntreferentie_positie:
+    sources:
+      - source
 
-      # This is the deliberate placeholder requested by you.
-      # Your script can later replace/add a proper cl-trt:* value.
-      - p: rdfs:comment
-        o: "$(thing.properties.richtung)"
-        language: de
+    s: "ex:puntreferentie/$(datastream['@iot.id'])/positie"
+
+    po:
+      - p: a
+        o: iso19103-mp:Length
+      - p: schema:unitCode
+        o: "m"
+        datatype: cdt:ucumunit
+      - p: schema:value
+        o: "$(_wegsegment.offsetM)"
+        datatype: xsd:double
+
 
   #################################################
-  # Geometry
+  # Sampling-point geometry (the meetpunt's point)
   #################################################
   geometrie:
     sources:
@@ -236,14 +142,123 @@ mappings:
 
     po:
       - p: a
-        o: geo:Geometry
+        o: sf:Point
+      - p: geo:asWKT
+        o: "POINT ($(locations[0].location.geometry.coordinates[0]) $(locations[0].location.geometry.coordinates[1]))"
+        datatype: geo:wktLiteral
 
+
+  #################################################
+  # Rijrichting (bemonsterdObject of the meetpunt)
+  #
+  # Direction code from _rijrichting.locationDirection (direction-mapper).
+  # Links the Wegsegment directly via impl:Rijrichting.netwerkreferentieelement
+  # (matches the Telraam reference — no intermediate Netwerkreferentie node).
+  #################################################
+  rijrichting:
+    sources:
+      - source
+
+    s: "ex:rijrichting/$(datastream['@iot.id'])"
+
+    po:
+      - p: a
+        o: dv-weg:Rijrichting
+
+      # dvweg:rijrichting requires class skos:Concept on the code (typed below).
+      - p: dv-weg:rijrichting
+        o: "cl-trt:$(_rijrichting.locationDirection)~iri"
+
+      - p: impl:Rijrichting.netwerkreferentieelement
+        o: "ex:wegsegment/$(datastream['@iot.id'])~iri"
+
+
+  #################################################
+  # Wegsegment (the network element)
+  #
+  # Centerline + begin/end knoop from the injected _wegsegment.
+  #################################################
+  wegsegment:
+    sources:
+      - source
+
+    s: "ex:wegsegment/$(datastream['@iot.id'])"
+
+    po:
+      - p: a
+        o: dv-weg:Wegsegment
+
+      - p: dv-netwerk:Link.geometriemiddellijn
+        o: "ex:wegsegment/$(datastream['@iot.id'])/middellijn~iri"
+
+      - p: dv-netwerk:beginknoop
+        o: "ex:wegsegment/$(datastream['@iot.id'])/beginknoop~iri"
+
+      - p: dv-netwerk:eindknoop
+        o: "ex:wegsegment/$(datastream['@iot.id'])/eindknoop~iri"
+
+  wegsegment_middellijn:
+    sources:
+      - source
+
+    s: "ex:wegsegment/$(datastream['@iot.id'])/middellijn"
+
+    po:
+      # WegsegmentShape requires class = the sf/1.0 LineString (not sf:LineString).
+      - p: a
+        o: sf-sg:LineString
+      - p: geo:asWKT
+        o: "$(_wegsegment.centerlineWkt)"
+        datatype: geo:wktLiteral
+
+  wegsegment_beginknoop:
+    sources:
+      - source
+
+    s: "ex:wegsegment/$(datastream['@iot.id'])/beginknoop"
+
+    po:
+      - p: a
+        o: dv-netwerk:Knoop
+      - p: dv-netwerk:Knoop.geometrie
+        o: "ex:wegsegment/$(datastream['@iot.id'])/beginknoop/geom~iri"
+
+  wegsegment_beginknoop_geom:
+    sources:
+      - source
+
+    s: "ex:wegsegment/$(datastream['@iot.id'])/beginknoop/geom"
+
+    po:
       - p: a
         o: sf:Point
-
-      # GeoSPARQL WKT uses x y = lon lat for EPSG:4326.
       - p: geo:asWKT
-        o: "<http://www.opengis.net/def/crs/EPSG/0/4326> POINT ($(locations[0].location.geometry.coordinates[0]) $(locations[0].location.geometry.coordinates[1]))"
+        o: "$(_wegsegment.beginWkt)"
+        datatype: geo:wktLiteral
+
+  wegsegment_eindknoop:
+    sources:
+      - source
+
+    s: "ex:wegsegment/$(datastream['@iot.id'])/eindknoop"
+
+    po:
+      - p: a
+        o: dv-netwerk:Knoop
+      - p: dv-netwerk:Knoop.geometrie
+        o: "ex:wegsegment/$(datastream['@iot.id'])/eindknoop/geom~iri"
+
+  wegsegment_eindknoop_geom:
+    sources:
+      - source
+
+    s: "ex:wegsegment/$(datastream['@iot.id'])/eindknoop/geom"
+
+    po:
+      - p: a
+        o: sf:Point
+      - p: geo:asWKT
+        o: "$(_wegsegment.eindWkt)"
         datatype: geo:wktLiteral
 
 
@@ -260,6 +275,11 @@ mappings:
       - p: a
         o: sosa:Sensor
 
+      # Hamburg's sensor is a FLIR ThermiCam2 thermal-imaging traffic camera,
+      # mapped to the closest VkmMeetInstrumentType concept.
+      - p: dct:type
+        o: "cl-mit:standaard_Camera~iri"
+
       - p: dct:identifier
         o: "$(sensor['@iot.id'])"
 
@@ -274,11 +294,91 @@ mappings:
       - p: dct:source
         o: "$(sensor['@iot.selfLink'])~iri"
 
-      - p: dct:modified
-        o: "$(sensor.properties.infoLastUpdate)"
+
+  #################################################
+  # Verkeerstelling / Verkeersmeting (measurement)
+  #################################################
+  verkeerstelling:
+    sources:
+      - source
+
+    s: "ex:verkeerstelling/$(observation['@iot.id'])"
+
+    po:
+      - p: a
+        o: impl:Verkeerstelling
+      - p: a
+        o: verkeer:Verkeersmeting
+
+      - p: dct:identifier
+        o: "$(observation['@iot.id'])"
+
+      - p: dct:source
+        o: "$(observation['@iot.selfLink'])~iri"
+
+      - p: prov:generatedAtTime
+        o: "$(observation.resultTime)"
         datatype: xsd:dateTime
 
-      # TODO: The OSLO implementation examples often classify the instrument type through cl-mit. Check for an exact mapping here if possible.
+      # SHACL VerkeersmetingShape requires these (min 1).
+      - p: iso19156-ob:OM_Observation.phenomenonTime
+        o: "ex:tijdsinterval/$(observation['@iot.id'])~iri"
+
+      # result is emitted as a plain string literal (the shape's sh:class on
+      # result has been dropped accordingly — a literal cannot satisfy sh:class).
+      - p: iso19156-ob:OM_Observation.result
+        o: "$(observation.result)"
+
+      - p: iso19156-ob:OM_Observation.resultTime
+        o: "ex:tijdsinterval/$(observation['@iot.id'])/begin~iri"
+
+      - p: verkeer:geobserveerdObject
+        o: "ex:verkeersmeetpunt/$(thing['@iot.id'])~iri"
+
+      - p: sosa:madeBySensor
+        o: "ex:sensor/$(sensor['@iot.id'])~iri"
+
+      # SHACL uses verkeer:geobserveerdKenmerk (not impl:Verkeerstelling.*).
+      - p: verkeer:geobserveerdKenmerk
+        o: "ex:verkeerstellingkenmerk/$(observation['@iot.id'])~iri"
+
+      - p: impl:Verkeerstelling.tellingresultaat
+        o: "$(observation.result)"
+        datatype: xsd:integer
+
+
+  #################################################
+  # Verkeerstellingkenmerk (per-measurement)
+  #
+  # rijrichting from _rijrichting.measurementDirection (the actual direction of
+  # this count). voertuigType + kenmerktype from the mapping.
+  #################################################
+  verkeerstellingkenmerk:
+    sources:
+      - source
+
+    s: "ex:verkeerstellingkenmerk/$(observation['@iot.id'])"
+
+    po:
+      - p: a
+        o: impl:Verkeerstellingkenmerk
+      # geobserveerdKenmerk requires class vkm:Verkeerskenmerk.
+      - p: a
+        o: verkeer:Verkeerskenmerk
+
+      - p: verkeer:voertuigType
+        o: "cl-vrt:auto~iri"
+
+      # VerkeerskenmerkShape requires dc11:type (min 1, skos:Concept) = the
+      # kenmerk type. Keep the impl: kenmerktype too for reference-model parity.
+      - p: dc11:type
+        o: "cl-vkt:aantal~iri"
+
+      - p: impl:Verkeerstellingkenmerk.kenmerktype
+        o: "cl-vkt:aantal~iri"
+
+      - p: impl:Verkeerstellingkenmerk.rijrichting
+        o: "cl-trt:$(_rijrichting.measurementDirection)~iri"
 
 
   #################################################
@@ -291,22 +391,19 @@ mappings:
     s: "ex:tijdsinterval/$(observation['@iot.id'])"
 
     po:
+      # phenomenonTime requires class TM_Object (defect-corrected from todo.com).
+      - p: a
+        o: iso19108:TM_Object
       - p: a
         o: time:TemporalEntity
-
-      - p: a
-        o: time:ProperInterval
 
       - p: time:hasBeginning
         o: "ex:tijdsinterval/$(observation['@iot.id'])/begin~iri"
 
-      - p: time:hasEnd
-        o: "ex:tijdsinterval/$(observation['@iot.id'])/einde~iri"
-
+      # Hamburg reports the interval as PT23H59M59S; the count covers one day.
       - p: time:hasXSDDuration
-        o: "$(observation.phenomenonTime.hasXSDDuration)"
+        o: "P1D"
         datatype: xsd:duration
-
 
   begin:
     sources:
@@ -315,97 +412,51 @@ mappings:
     s: "ex:tijdsinterval/$(observation['@iot.id'])/begin"
 
     po:
+      # resultTime requires class TM_Instant.
+      - p: a
+        o: iso19108:TM_Instant
       - p: a
         o: time:Instant
 
       - p: time:inXSDDateTimeStamp
         o: "$(observation.phenomenonTime.hasBeginning.inXSDDateTimeStamp)"
-        datatype: xsd:dateTimeStamp
-
-
-  einde:
-    sources:
-      - source
-
-    s: "ex:tijdsinterval/$(observation['@iot.id'])/einde"
-
-    po:
-      - p: a
-        o: time:Instant
-
-      - p: time:inXSDDateTimeStamp
-        o: "$(observation.phenomenonTime.hasEnd.inXSDDateTimeStamp)"
-        datatype: xsd:dateTimeStamp
-
-
-  #################################################
-  # Optional source trace: datastream as provenance object
-  #################################################
-  datastream:
-    sources:
-      - source
-
-    s: "ex:datastream/$(datastream['@iot.id'])"
-
-    po:
-      - p: a
-        o: sosa:ObservationCollection
-
-      - p: dct:identifier
-        o: "$(datastream['@iot.id'])"
-
-      - p: rdfs:label
-        o: "$(datastream.name)"
-        language: de
-
-      - p: dct:description
-        o: "$(datastream.description)"
-        language: de
-
-      - p: dct:source
-        o: "$(datastream['@iot.selfLink'])~iri"
-
-      - p: dct:modified
-        o: "$(datastream.properties.infoLastUpdate)"
         datatype: xsd:dateTime
 
+
   #################################################
-  # Concept: verkeerskenmerktype aantal
+  # Codelist concepts typed as skos:Concept
+  #
+  # The SHACL requires skos:Concept on dvweg:rijrichting (and the kenmerk's
+  # voertuigType/kenmerktype). Declare each referenced code as a skos:Concept.
   #################################################
-  conceptAantal:
+  concept_direction_location:
     sources:
       - source
-
-    s: "cl-vkt:aantal"
-
+    s: "cl-trt:$(_rijrichting.locationDirection)"
     po:
       - p: a
         o: skos:Concept
 
-      - p: skos:prefLabel
-        o: "aantal"
-        language: nl
-
-      - p: skos:notation
-        o: "aantal"
-
-
-  #################################################
-  # Concept: voertuigtype auto
-  #################################################
-  conceptAuto:
+  concept_direction_measurement:
     sources:
       - source
+    s: "cl-trt:$(_rijrichting.measurementDirection)"
+    po:
+      - p: a
+        o: skos:Concept
 
+  concept_voertuigtype:
+    sources:
+      - source
     s: "cl-vrt:auto"
-
     po:
       - p: a
         o: skos:Concept
 
-      - p: skos:prefLabel
-        o: "auto"
-        language: nl
-
-      - p: skos:notation
-        o: "auto"
+  concept_kenmerktype:
+    sources:
+      - source
+    s: "cl-vkt:aantal"
+    po:
+      - p: a
+        o: skos:Concept

@@ -1,0 +1,15 @@
+services:
+  oxigraph:
+    image: ghcr.io/oxigraph/oxigraph:latest
+    container_name: oxigraph
+    command: serve --location /data --bind 0.0.0.0:7878
+    ports:
+      - "7878:7878"
+    volumes:
+      - ./oxigraph-data:/data
+    restart: unless-stopped
+    networks:
+      - rdfc-net
+networks:
+  rdfc-net:
+    external: true
