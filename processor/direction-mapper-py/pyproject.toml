@@ -1,0 +1,35 @@
+[project]
+name = "rdfc_direction-mapper"
+version = "0.0.1"
+description = "A processor that classifies a Rijrichting's German direction phrase as inDirection / inOppositeDirection / bothDirections relative to a snapped Wegsegment."
+authors = [
+    { name = "Movias" }
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+license = "MIT"
+dependencies = [
+    "rdfc-proto>=1.0.0",
+    "rdfc-runner>=1.0.0",
+    "shapely>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://rdf-connect.github.io"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rdfc_direction_mapper"]
+
+[tool.hatch.envs.default]
+type = "virtual"
+path = ".venv"
+system-packages = false
+installer = "uv"
+env-vars = { PYTHONPATH = "src" }

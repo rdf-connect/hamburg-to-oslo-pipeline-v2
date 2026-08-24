@@ -16,10 +16,14 @@
 <> owl:imports <./node_modules/@rdfc/shacl-processor-ts/processors.ttl>.
 <> owl:imports <./node_modules/@rdfc/sparql-ingest-processor-ts/processors.ttl>.
 <> owl:imports <./.venv/lib/python3.13/site-packages/rdfc_translation_processor/processor.ttl>.
+<> owl:imports <./.venv/lib/python3.13/site-packages/rdfc_road_snapper/processor.ttl>.
+<> owl:imports <./.venv/lib/python3.13/site-packages/rdfc_direction_mapper/processor.ttl>.
 <> owl:imports <../processor/http-utils-processor-ts/processors.ttl>.
 
 ### Define the channels
 <json> a rdfc:Reader, rdfc:Writer.
+<snappedJson> a rdfc:Reader, rdfc:Writer.
+<enrichedJson> a rdfc:Reader, rdfc:Writer.
 <mappingData> a rdfc:Reader, rdfc:Writer.
 <rdf> a rdfc:Reader, rdfc:Writer.
 <translated> a rdfc:Reader, rdfc:Writer.
@@ -37,7 +41,7 @@
        rdfc:processor <mapper>;
    ], [
        rdfc:instantiates rdfc:PyRunner;
-       rdfc:processor <translator>;
+       rdfc:processor <roadSnapper>, <directionMapper>, <translator>;
    ].
    
 # fetcher to get SensorThings API data
@@ -47,21 +51,33 @@
     rdfc:mqttBrokerUrl [ a rdfl:EnvVariable;
 		rdfl:envDefault "mqtt://iot.hamburg.de:1883";
 		rdfl:envKey "MQTTBROKER";
-	]; 
+	];
     rdfc:follow true .
 
+# Pre-RML enricher: snap each SensorThings record's coordinate to the nearest
+# drivable road segment, injecting _wegsegment (centerline + begin/end) into the JSON.
+<roadSnapper> a rdfc:RoadSnapperProcessor;
+    rdfc:reader <json>;
+    rdfc:writer <snappedJson>;
+    rdfc:sourcePath "../processor/road-snapper-py/resources/hamburg-260714.osm.pbf".
+
+# Pre-RML enricher: classify the German direction phrase against the injected
+# _wegsegment, injecting _rijrichting (location + measurement cl-trt codes).
+<directionMapper> a rdfc:DirectionMapperProcessor;
+    rdfc:reader <snappedJson>;
+    rdfc:writer <enrichedJson>.
 
 # Processor to read and stream out the RML mappings
 <mappingReader> a rdfc:GlobRead;
     rdfc:glob <./resources/mapping.rml.ttl>;
     rdfc:output <mappingData>.
 
-# Processor to do the RML mapping
+# Processor to do the RML mapping over the enriched JSON
 <mapper> a rdfc:RmlMapper;
     rdfc:mappings <mappingData>;
     rdfc:source [
         rdfc:triggers true;
-        rdfc:reader <json>;
+        rdfc:reader <enrichedJson>;
         rdfc:mappingId ex:source1;
     ];
     rdfc:defaultTarget [
@@ -69,7 +85,7 @@
         rdfc:format "turtle";
     ].
 
-# Processor to translate RDF literals from German to English
+# Processor to translate RDF literals from German to Dutch
 <translator> a rdfc:TranslationProcessor;
     rdfc:reader <rdf>;
     rdfc:writer <translated>;
