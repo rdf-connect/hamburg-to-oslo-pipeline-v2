@@ -46,7 +46,9 @@
    
 # fetcher to get SensorThings API data
 <fetcher> a rdfc:SensorThingsFetcher;
-    rdfc:datastream "https://iot.hamburg.de/v1.1/Datastreams(26598)", "https://iot.hamburg.de/v1.1/Datastreams(29728)", "https://iot.hamburg.de/v1.1/Datastreams(30936)";
+    rdfc:datastream [ a rdfl:EnvVariable;
+		rdfl:envKey "DATASTREAMS";
+	]; 
     rdfc:writer <json> ;
     rdfc:mqttBrokerUrl [ a rdfl:EnvVariable;
 		rdfl:envDefault "mqtt://iot.hamburg.de:1883";
